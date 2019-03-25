@@ -3,9 +3,8 @@ import Router from 'vue-router';
 import HelloWorld from '@/components/HelloWorld';
 import Register from '@/components/Register';
 import Login from '@/components/Login';
-import Summary from '../components/Summary';
 import Match from '../components/Match';
-import Table from '../components/Table';
+import Competition from '../components/Competition';
 
 Vue.use(Router);
 
@@ -27,19 +26,14 @@ const router = new Router({
       component: Login
     },
     {
-      path: '/summary',
-      name: 'Summary',
-      component: Summary
-    },
-    {
-      path: '/match/:id',
-      name: 'match',
+      path: '/competition/:name/match/:id',
+      name: 'Match',
       component: Match
     },
     {
-      path: '/table',
-      name: 'table',
-      component: Table
+      path: '/competition/:name',
+      name: 'Competition',
+      component: Competition
     }
   ],
   hashbang: false,

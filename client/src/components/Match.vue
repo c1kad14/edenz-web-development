@@ -1,7 +1,15 @@
 <template>
   <v-container dark>
 
-    <v-breadcrumbs :items="items"></v-breadcrumbs>
+    <v-breadcrumbs :items="items">
+      <v-breadcrumbs-item
+        v-for="item in items"
+        :key="item.text"
+        :disabled="item.disabled"
+        @click="navigateTo(item.link)">
+        {{ item.text }}
+      </v-breadcrumbs-item>
+    </v-breadcrumbs>
 
     <v-flex>
       <div v-if="loading" dark>
@@ -48,14 +56,14 @@ export default {
       eventTypes: eventTypes,
       items: [
         {
-          text: 'Summary',
+          text: 'Back',
           disabled: false,
-          to: '/summary'
+          link: `/competition/${this.$route.params.name}`
         },
         {
           text: 'Match Info',
           disabled: true,
-          href: 'match'
+          link: `/competition/${this.$route.params.name}`
         }
       ]
     };

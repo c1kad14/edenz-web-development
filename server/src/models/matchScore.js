@@ -20,12 +20,15 @@ const matchScoreSchema = mongoose.Schema({
 const MatchScore = (module.exports = mongoose.model('MatchScore', matchScoreSchema));
 
 module.exports.getMatchScores = function (predicate, callback, limit) {
+    console.log(predicate);
     let query = {};
     if (predicate) {
         if (predicate.regExp) {
             query[predicate.regExp.key] = new RegExp(predicate.regExp.value);
-        } else {
-            query = predicate;
+        }
+
+        if(predicate.fields) {
+            predicate.fields.forEach((f) => query[f.key] = f.value);
         }
     }
     MatchScore.find(query, callback).limit(limit);

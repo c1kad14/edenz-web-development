@@ -61,6 +61,11 @@ export default {
       matches: undefined
     };
   },
+  watch: {
+    '$route.params.name': function () {
+      this.fetchData();
+    }
+  },
   created () {
     // fetch the data when the view is created and the data is
     // already being observed
@@ -161,8 +166,54 @@ export default {
       this.error = null;
       this.loading = true;
 
+      const paramName = this.$route.params.name;
+      let fields = [];
+      switch (paramName) {
+        case 'english-premier-league':
+          fields.push({'key': 'competition', 'value': 'Premier League'}, {'key': 'country', 'value': 'England'});
+          break;
+        case 'english-championship':
+          fields.push({'key': 'competition', 'value': 'Championship'},
+            {'key': 'country', 'value': 'England'});
+          break;
+        case 'french-ligue-1':
+          fields.push({'key': 'competition', 'value': 'Ligue 1'},
+            {'key': 'country', 'value': 'France'});
+          break;
+        case 'german-bundesliga':
+          fields.push({'key': 'competition', 'value': 'Bundesliga'},
+            {'key': 'country', 'value': 'Germany'});
+          break;
+        case 'german-2nd-bundesliga':
+          fields.push({'key': 'competition', 'value': '2nd Bundesliga'},
+            {'key': 'country', 'value': 'Germany'});
+          break;
+        case 'italian-seria-a':
+          fields.push({'key': 'competition', 'value': 'Seria A'},
+            {'key': 'country', 'value': 'Italy'});
+          break;
+        case 'spanish-laliga':
+          fields.push({'key': 'competition', 'value': 'LaLiga Santander'},
+            {'key': 'country', 'value': 'Spain'});
+          break;
+        case 'portugese-primeira-liga':
+          fields.push({'key': 'competition', 'value': 'Primeira Liga'},
+            {'key': 'country', 'value': 'Portugal'});
+          break;
+        case 'dutch-eredivisie':
+          fields.push({'key': 'competition', 'value': 'Eredivisie'},
+            {'key': 'country', 'value': 'Netherlands'});
+          break;
+        default:
+          throw Error('Unknown competition');
+      }
+
       try {
-        const matches = await api().post('filterMatches');
+        const matches = await api().post('filterMatches', {
+          predicate: {
+            fields: fields
+          }
+        });
         this.matches = matches.data;
       } catch (err) {
         this.error = err.toString();

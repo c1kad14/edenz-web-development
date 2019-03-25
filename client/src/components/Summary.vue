@@ -1,40 +1,39 @@
 <template>
   <v-container dark>
-    <v-content>
-      <v-layout class="">
-        <v-flex xs10 class="">
-          <div v-if="loading" dark>
-            <v-progress-circular
-              indeterminate
-              color="amber"
-            ></v-progress-circular>
-          </div>
+    <v-layout justify-space-between>
+      <v-flex>
+        <div v-if="loading" dark>
+          <v-progress-circular
+            indeterminate
+            color="amber"
+          ></v-progress-circular>
+        </div>
 
-          <v-data-table
-            v-if="!loading"
-            :headers="headers"
-            :items="items"
-            class="elevation-1"
-            hide-actions
-          >
-            <template slot="items" slot-scope="items">
-              <tr :matchId="items.item._id" class="score  " @click="navigateTo(`match/${items.item._id}`)">
-                <td class="text-xs-center">{{ prettyDate(items.item.startTime) }}</td>
-                <td class="text-xs-center">{{ items.item.home }}</td>
-                <td class="text-xs-center">{{ items.item.ftScore }}
-                </td>
-                <td class="text-xs-center ">{{ items.item.away }}</td>
-              </tr>
-            </template>
-          </v-data-table>
-        </v-flex>
+        <v-data-table
+          v-if="!loading"
+          :headers="headers"
+          :items="items"
+          class="elevation-1"
+          hide-actions
+        >
+          <template slot="items" slot-scope="items">
+            <tr :matchId="items.item._id" class="score  "
+                @click="navigateTo(`${$route.params.name}/match/${items.item._id}`)">
+              <td class="text-xs-center">{{ prettyDate(items.item.startTime) }}</td>
+              <td class="text-xs-center">{{ items.item.home }}</td>
+              <td class="text-xs-center">{{ items.item.ftScore }}
+              </td>
+              <td class="text-xs-center ">{{ items.item.away }}</td>
+            </tr>
+          </template>
+        </v-data-table>
+      </v-flex>
 
-        <v-flex class="" offset-xs1>
-          <v-date-picker ref="picker" v-model="date" :picker-date.sync="pickerDate" :events="events"
-          ></v-date-picker>
-        </v-flex>
-      </v-layout>
-    </v-content>
+      <v-flex id="picker">
+        <v-date-picker ref="picker" v-model="date" :picker-date.sync="pickerDate" :events="events"
+        ></v-date-picker>
+      </v-flex>
+    </v-layout>
   </v-container>
 </template>
 
@@ -64,7 +63,9 @@ export default {
   // },
   watch: {
     // call again the method if the route changes
-    // '$route': 'summary',
+    '$route.params.name': function () {
+      this.fetchData();
+    },
     async pickerDate () {
       await this.fetchData(false);
     },
@@ -74,6 +75,7 @@ export default {
   },
   methods: {
     navigateTo (route) {
+      console.log(route);
       this.$router.push(route);
     },
     prettyDate (date) {
@@ -81,6 +83,48 @@ export default {
       return `${prettyDate.substr(5, 6)}, ${prettyDate.substr(17, 5)}`;
     },
     async fetchData (day) {
+      const paramName = this.$route.params.name;
+      let fields = [];
+      switch (paramName) {
+        case 'english-premier-league':
+          fields.push({'key': 'competition', 'value': 'Premier League'}, {'key': 'country', 'value': 'England'});
+          break;
+        case 'english-championship':
+          fields.push({'key': 'competition', 'value': 'Championship'},
+            {'key': 'country', 'value': 'England'});
+          break;
+        case 'french-ligue-1':
+          fields.push({'key': 'competition', 'value': 'Ligue 1'},
+            {'key': 'country', 'value': 'France'});
+          break;
+        case 'german-bundesliga':
+          fields.push({'key': 'competition', 'value': 'Bundesliga'},
+            {'key': 'country', 'value': 'Germany'});
+          break;
+        case 'german-2nd-bundesliga':
+          fields.push({'key': 'competition', 'value': '2nd Bundesliga'},
+            {'key': 'country', 'value': 'Germany'});
+          break;
+        case 'italian-seria-a':
+          fields.push({'key': 'competition', 'value': 'Seria A'},
+            {'key': 'country', 'value': 'Italy'});
+          break;
+        case 'spanish-laliga':
+          fields.push({'key': 'competition', 'value': 'LaLiga Santander'},
+            {'key': 'country', 'value': 'Spain'});
+          break;
+        case 'portugese-primeira-liga':
+          fields.push({'key': 'competition', 'value': 'Primeira Liga'},
+            {'key': 'country', 'value': 'Portugal'});
+          break;
+        case 'dutch-eredivisie':
+          fields.push({'key': 'competition', 'value': 'Eredivisie'},
+            {'key': 'country', 'value': 'Netherlands'});
+          break;
+        default:
+          throw Error('Unknown competition');
+      }
+
       this.error = null;
       this.loading = true;
 
@@ -91,6 +135,7 @@ export default {
       try {
         const matches = await api().post('filterMatches', {
           predicate: {
+            fields: fields,
             regExp: {
               'key': 'startTime',
               'value': `^${day ? this.date : this.pickerDate}`
@@ -127,5 +172,9 @@ export default {
 <style scoped>
   .score {
     cursor: pointer
+  }
+
+  #picker {
+    margin-left: 10px;
   }
 </style>
