@@ -1,6 +1,6 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <nav>
-    <v-toolbar flat fixed dark class="yellow darken-2">
+    <v-toolbar flat fixed dark id="header-toolbar">
       <v-toolbar-side-icon @click="drawer = !drawer" class="grey--text"></v-toolbar-side-icon>
       <v-toolbar-title class="app-root" @click="navigateTo({name: 'root'})">
         <img id="logo" src="../../static/favicon.png"/>
@@ -15,8 +15,8 @@
       <v-spacer/>
 
       <v-toolbar-items>
-        <v-btn v-if="!$store.state.isLoggedIn" flat @click="navigateTo('login')">Sign In</v-btn>
-        <v-btn v-if="!$store.state.isLoggedIn" flat @click="navigateTo('register')">Sign Up</v-btn>
+        <v-btn v-if="!$store.state.isLoggedIn" flat @click="navigateTo({name: 'Login'})">Sign In</v-btn>
+        <v-btn v-if="!$store.state.isLoggedIn" flat @click="navigateTo({name: 'Register'})">Sign Up</v-btn>
         <v-btn v-if="$store.state.isLoggedIn" flat @click="logout">Logout</v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -39,7 +39,7 @@
           <template v-slot:activator>
             <v-list-tile>
               <v-list-tile-content>
-                <v-list-tile-title>{{ link.text }}</v-list-tile-title>
+                <v-list-tile-title><img class="flag" :src="getPngFromStatic(link.text)"/> {{ link.text }}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </template>
@@ -52,9 +52,8 @@
             <v-list-tile-content>
               <v-list-tile-title>{{ competition.text }}</v-list-tile-title>
             </v-list-tile-content>
-
             <v-list-tile-action>
-              <v-icon>{{ competition.icon }}</v-icon>
+              <img class="competition-logo" :src="getPngFromStatic(competition.icon)"/>
             </v-list-tile-action>
           </v-list-tile>
         </v-list-group>
@@ -64,124 +63,100 @@
 </template>
 
 <script>
+
 export default {
+  name: 'PageHeader',
   data: () => ({
     drawer: false,
     links: [
       {
-        icon: 'dashboard',
         text: 'England',
         active: true,
         competitions: [
           {
-            icon: 'dashboard',
+            icon: 'premier-league',
             text: 'Premier League',
             route: '/competition/english-premier-league'
           },
           {
-            icon: 'dashboard',
+            icon: 'championship',
             text: 'Championship',
             route: '/competition/english-championship'
           }
         ]
       },
       {
-        icon: 'dashboard',
         text: 'France',
-        active: true,
+        active: false,
         competitions: [
           {
-            icon: 'dashboard',
+            icon: 'ligue1',
             text: 'Ligue 1',
             route: '/competition/french-ligue-1'
           }
         ]
       },
       {
-        icon: 'dashboard',
         text: 'Germany',
-        active: true,
+        active: false,
         competitions: [
           {
-            icon: 'dashboard',
+            icon: 'bundesliga',
             text: 'Bundesliga',
             route: '/competition/german-bundesliga'
           },
           {
-            icon: 'dashboard',
+            icon: 'bundesliga2',
             text: '2nd Bundesliga',
             route: '/competition/german-2nd-bundesliga'
           }
         ]
       },
       {
-        icon: 'dashboard',
-        text: 'Germany',
-        active: true,
-        competitions: [
-          {
-            icon: 'dashboard',
-            text: 'Bundesliga',
-            route: '/competition/german-bundesliga'
-          },
-          {
-            icon: 'dashboard',
-            text: '2nd Bundesliga',
-            route: '/competition/german-2nd-bundesliga'
-          }
-        ]
-      },
-      {
-        icon: 'dashboard',
         text: 'Italy',
-        active: true,
+        active: false,
         competitions: [
           {
-            icon: 'dashboard',
-            text: 'Seria A',
-            route: '/competition/italian-seria-a'
+            icon: 'serie-a',
+            text: 'Serie A',
+            route: '/competition/italian-serie-a'
           }
         ]
       },
       {
-        icon: 'dashboard',
         text: 'Spain',
-        active: true,
+        flag: 'es',
+        active: false,
         competitions: [
           {
-            icon: 'dashboard',
+            icon: 'laliga',
             text: 'LaLiga Santander',
             route: '/competition/spanish-laliga'
           }
         ]
       },
       {
-        icon: 'dashboard',
         text: 'Portugal',
-        active: true,
+        active: false,
         competitions: [
           {
-            icon: 'dashboard',
+            icon: 'primeira-liga',
             text: 'Primeira Liga',
             route: '/competition/portugese-primeira-liga'
           }
         ]
       },
       {
-        icon: 'dashboard',
         text: 'Netherlands',
-        active: true,
+        active: false,
         competitions: [
           {
-            icon: 'dashboard',
+            icon: 'eredivisie',
             text: 'Eredivisie',
             route: '/competition/dutch-eredivisie'
           }
         ]
-      },
-      // { icon: 'dashboard', text: 'Summary', route: '/summary' },
-      // { icon: 'table', text: 'Table', route: '/table' },
-      // { icon: 'person', text: 'Team', route: '/team' }
+      }
     ]
   }),
   methods: {
@@ -192,6 +167,9 @@ export default {
       this.$store.dispatch('setToken', null);
       this.$store.dispatch('setUser', null);
       this.$router.push({name: 'root'});
+    },
+    getPngFromStatic (country) {
+      return `/../../static/${country.toLowerCase()}.png`;
     }
   }
 }
@@ -199,6 +177,9 @@ export default {
 </script>
 
 <style>
+  #header-toolbar{
+    background: #ffb80c;
+  }
   #logo {
     width: 35px;
   }
@@ -209,5 +190,18 @@ export default {
 
   .app-root:hover {
     opacity: 0.8;
+  }
+
+  .flag{
+    width: 23px;
+    height: 23px;
+    vertical-align: middle;
+    margin-bottom: 5px;
+  }
+
+  .competition-logo {
+    max-width: 35px;
+    max-height: 30px;
+    vertical-align: middle;
   }
 </style>

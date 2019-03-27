@@ -8,7 +8,13 @@
             color="amber"
           ></v-progress-circular>
         </div>
-
+        <v-text-field
+          flat
+          label="Search team"
+          prepend-inner-icon="search"
+          solo-inverted
+          dark
+        ></v-text-field>
         <v-data-table
           v-if="!loading"
           :headers="headers"
@@ -41,7 +47,6 @@
 import api from '../services/api';
 
 export default {
-
   name: 'Summary',
   data () {
     return {
@@ -56,11 +61,6 @@ export default {
       events: null
     };
   },
-  // created () {
-  //   // fetch the data when the view is created and the data is
-  //   // already being observed
-  //   this.fetchData();
-  // },
   watch: {
     // call again the method if the route changes
     '$route.params.name': function () {
@@ -105,7 +105,7 @@ export default {
           fields.push({'key': 'competition', 'value': '2nd Bundesliga'},
             {'key': 'country', 'value': 'Germany'});
           break;
-        case 'italian-seria-a':
+        case 'italian-serie-a':
           fields.push({'key': 'competition', 'value': 'Seria A'},
             {'key': 'country', 'value': 'Italy'});
           break;

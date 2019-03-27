@@ -33,7 +33,6 @@ import Summary from './Summary.vue';
 import Table from './Table.vue';
 
 export default {
-
   name: 'Competition',
   components: {Summary, Table},
   data () {

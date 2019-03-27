@@ -1,7 +1,7 @@
 <template>
   <v-app id="app" dark>
     <page-header/>
-    <v-content class="mar">
+    <v-content class="margin-top-60">
       <v-container>
         <router-view/>
       </v-container>
@@ -34,7 +34,21 @@ export default {
     border: 1px red solid;
   }
 
-  .mar {
+  .margin-top-60 {
     margin-top: 60px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: #eaeaea;
+    border-left: 1px solid #ccc;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
   }
 </style>

@@ -188,7 +188,7 @@ export default {
           fields.push({'key': 'competition', 'value': '2nd Bundesliga'},
             {'key': 'country', 'value': 'Germany'});
           break;
-        case 'italian-seria-a':
+        case 'italian-serie-a':
           fields.push({'key': 'competition', 'value': 'Seria A'},
             {'key': 'country', 'value': 'Italy'});
           break;

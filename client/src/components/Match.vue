@@ -28,14 +28,35 @@
           <v-layout v-if="shouldDisplay(event)" row>
             <v-flex xs5>
                   <span v-if="match.home.teamId === event.teamId">
-                   {{getEventText(event)}}
+                    <span v-if="getEventText(event) instanceof Array">
+                      <span class="event-text"> {{getEventText(event)[0]}} </span>
+                      <img class="event-icon" :src="getEventTypeIcon(event)[0]"/>
+                      <span class="event-text"> {{getEventText(event)[1]}} </span>
+                      <img class="event-icon" v-if="getEventText(event)[1]" :src="getEventTypeIcon(event)[1]"/>
+                    </span>
+                    <span v-else>
+                      <span class="event-text"> {{getEventText(event)}} </span>
+                    <img class="event-icon" v-if="getEventTypeIcon(event) !== undefined"
+                         :src="getEventTypeIcon(event)"/>
+                    </span>
                 </span>
             </v-flex>
-            <v-flex xs2>{{event.minute}}:{{event.second}}'</v-flex>
+            <v-flex xs2>{{event.minute}}'</v-flex>
             <v-flex xs5>
                   <span v-if="match.away.teamId === event.teamId">
-                    {{getEventText(event)}}
-                </span></v-flex>
+                   <span v-if="getEventText(event) instanceof Array">
+                      <span class="event-text"> {{getEventText(event)[0]}} </span>
+                      <img class="event-icon" :src="getEventTypeIcon(event)[0]"/>
+                     <span class="event-text"> {{getEventText(event)[1]}} </span>
+                      <img class="event-icon" v-if="getEventText(event)[1]" :src="getEventTypeIcon(event)[1]"/>
+                    </span>
+                    <span v-else>
+                      <span class="event-text"> {{getEventText(event)}} </span>
+                    <img class="event-icon" v-if="getEventTypeIcon(event) !== undefined"
+                         :src="getEventTypeIcon(event)"/>
+                    </span>
+                </span>
+            </v-flex>
           </v-layout>
         </div>
       </v-flex>
@@ -94,15 +115,27 @@ export default {
     getPlayerById (id) {
       return this.match.playerIdNameDictionary[id];
     },
+    getEventTypeIcon (event) {
+      switch (event.type.displayName) {
+        case this.eventTypes.card:
+          return `/../../static/${event.cardType.displayName.toLowerCase()}.png`;
+        case this.eventTypes.goal:
+          return ['/../../static/goal.png', '/../../static/assist.png'];
+        case this.eventTypes.substitutionOff:
+          return ['/../../static/sub-out.png', '/../../static/sub-in.png'];
+        default:
+          return undefined;
+      }
+    },
     getEventText (event) {
       switch (event.type.displayName) {
         case this.eventTypes.card:
-          return this.match.playerIdNameDictionary[event.playerId] + ' ' + event.cardType.displayName + ' ' + event.type.displayName;
+          return this.match.playerIdNameDictionary[event.playerId];
         case this.eventTypes.substitutionOff:
-          return 'OUT: ' + this.match.playerIdNameDictionary[event.playerId] + ' IN: ' + this.match.playerIdNameDictionary[event.relatedPlayerId];
+          return [this.match.playerIdNameDictionary[event.playerId], this.match.playerIdNameDictionary[event.relatedPlayerId]];
         case this.eventTypes.goal:
-          const assist = event.relatedPlayerId !== undefined ? ` Assisted by: ${this.match.playerIdNameDictionary[event.relatedPlayerId]}` : '';
-          return this.match.playerIdNameDictionary[event.playerId] + ' GOOOAL!!! ' + assist;
+          const assist = event.relatedPlayerId ? this.match.playerIdNameDictionary[event.relatedPlayerId] : undefined;
+          return [this.match.playerIdNameDictionary[event.playerId], assist];
         default:
           return event.type.displayName;
       }
@@ -158,6 +191,12 @@ export default {
   }
 
   #match-info {
-    color: coral;
+    color: #ffb80c;
+  }
+
+  .event-icon {
+    width: 15px;
+    height: 15px;
+    margin-top: 5px;
   }
 </style>

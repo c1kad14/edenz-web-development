@@ -80,6 +80,8 @@
         </a>
       </li>
     </ul>
+
+    <span id="flag" class="flag-icon flag-icon-nz"></span>
   </div>
 </template>
 
