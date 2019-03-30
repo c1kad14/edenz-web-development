@@ -39,7 +39,8 @@
           <template v-slot:activator>
             <v-list-tile>
               <v-list-tile-content>
-                <v-list-tile-title><img class="flag" :src="getPngFromStatic(link.text)"/> {{ link.text }}</v-list-tile-title>
+                <v-list-tile-title><img class="flag" :src="getPngFromStatic(link.text)"/> {{ link.text }}
+                </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </template>
@@ -177,9 +178,10 @@ export default {
 </script>
 
 <style>
-  #header-toolbar{
+  #header-toolbar {
     background: #ffb80c;
   }
+
   #logo {
     width: 35px;
   }
@@ -192,7 +194,7 @@ export default {
     opacity: 0.8;
   }
 
-  .flag{
+  .flag {
     width: 23px;
     height: 23px;
     vertical-align: middle;

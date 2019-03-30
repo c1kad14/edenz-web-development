@@ -1,70 +1,28 @@
 <template>
-  <v-container id="competition-table" class="border" dark>
-    <v-layout>
-      <v-flex>
-        <div v-if="loading">
-          <v-progress-circular
-            indeterminate
-            color="amber"
-          ></v-progress-circular>
-        </div>
-        <table id="standings-table" v-if="!loading">
-          <thead>
-          <tr>
-            <th :key="header.text" v-for="header in headers">{{header.text}}</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr :key="item.name" class="score" v-for="item in items">
-            <td class="text-xs-center">{{ item.position }}</td>
-            <td class="text-xs-center">{{ item.team }}</td>
-            <td class="text-xs-center">{{ item.games }}</td>
-            <td class="text-xs-center">{{ item.points }}</td>
-            <td class="text-xs-center">{{ item.wins }}</td>
-            <td class="text-xs-center">{{ item.draws }}</td>
-            <td class="text-xs-center">{{ item.losses }}</td>
-            <td class="text-xs-center">{{ item.scored }}</td>
-            <td class="text-xs-center">{{ item.missed }}</td>
-            <td class="text-xs-center">{{ item.diff }}</td>
-          </tr>
-          </tbody>
-        </table>
-      </v-flex>
-    </v-layout>
+  <v-container class="standings-graph-container border" dark>
+    <bar-chart class="standings-graph-container"
+               v-if="chartData !== null"
+               :chart-data="chartData"
+    />
   </v-container>
 </template>
 
 <script>
+import BarChart from './BarChart.vue';
 import api from '../services/api';
 
 export default {
-  name: 'Summary',
-  data () {
-    return {
-      loading: false,
-      headers: [{text: '#', value: 'number', sortable: false, align: 'center'},
-        {text: 'Team', value: 'team', sortable: false, align: 'center'},
-        {text: 'G', value: 'games', sortable: false, align: 'center'},
-        {text: 'PTS', value: 'pts', sortable: false, align: 'center'},
-        {text: 'W', value: 'wins', sortable: false, align: 'center'},
-        {text: 'D', value: 'draws', sortable: false, align: 'center'},
-        {text: 'L', value: 'losses', sortable: false, align: 'center'},
-        {text: 'GS', value: 'scored', sortable: false, align: 'center'},
-        {text: 'GM', value: 'missed', sortable: false, align: 'center'},
-        {text: 'GD', value: 'diff', sortable: false, align: 'center'}
-      ],
-      matches: undefined
-    };
-  },
+  name: 'StandingsGraph',
+  components: {BarChart},
+  data: () => ({
+    chartData: null,
+    matches: []
+  }),
   watch: {
     '$route.params.name': function () {
-      this.fetchData();
+      this.chartData = null;
+      this.drawGraph();
     }
-  },
-  created () {
-    // fetch the data when the view is created and the data is
-    // already being observed
-    this.fetchData();
   },
   computed: {
     items: function () {
@@ -153,13 +111,12 @@ export default {
       }
     }
   },
+  async mounted () {
+    await this.drawGraph();
+  },
   methods: {
-    navigateTo (route) {
-      this.$router.push(route);
-    },
     async fetchData () {
       this.error = null;
-      this.loading = true;
 
       const paramName = this.$route.params.name;
       let fields = [];
@@ -213,8 +170,6 @@ export default {
       } catch (err) {
         this.error = err.toString();
       }
-
-      this.loading = false;
     },
     compare (a, b) {
       if (a.points > b.points) {
@@ -230,27 +185,108 @@ export default {
         return 1;
       }
       return 0;
+    },
+    async drawGraph () {
+      try {
+        await this.fetchData();
+
+        let labels = this.items.map(i => i.team);
+        let gData = this.items.map(i => i.points);
+
+        this.chartData = {
+          labels: labels,
+          datasets: [{
+            label: '# of Points',
+            data: gData,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)', 'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)', 'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)', 'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        };
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };
-
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .score {
-    cursor: pointer;
-    width: 100%;
-  }
-
-  #competition-table {
-    text-align: center;
-    width: 100%;
-    min-width: 360px;
-    max-width: 550px;
-  }
-
-  #standings-table {
-    width: 100%;
+<style>
+  .standings-graph-container #bar-chart {
+    width: 100% !important;
+    max-width: 500px;
+    min-width: 300px;
+    padding: 0px;
   }
 </style>

@@ -1,6 +1,5 @@
 <template>
   <v-container dark>
-
     <v-breadcrumbs :items="items">
       <v-breadcrumbs-item
         v-for="item in items"

@@ -1,10 +1,8 @@
 <template>
   <v-app id="app" dark>
     <page-header/>
-    <v-content class="margin-top-60">
-      <v-container>
-        <router-view/>
-      </v-container>
+    <v-content class="margin-top-100">
+      <router-view/>
     </v-content>
   </v-app>
 </template>
@@ -31,23 +29,28 @@ export default {
   }
 
   .border {
-    border: 1px red solid;
+    border: 1px #ffb80c solid;
+    color: #EFEBE9;
+    border-radius: 15px;
   }
 
-  .margin-top-60 {
-    margin-top: 60px;
+  .margin-top-100 {
+    margin-top: 100px;
   }
 
   ::-webkit-scrollbar {
     width: 12px;
   }
+
   ::-webkit-scrollbar-track {
     background-color: #eaeaea;
     border-left: 1px solid #ccc;
   }
+
   ::-webkit-scrollbar-thumb {
     background-color: #ccc;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background-color: #aaa;
   }
