@@ -191,9 +191,8 @@ export default {
   }
 
   #summary-container {
-    max-width: 500px;
-    min-width: 360px;
-    width: 100%;
+    min-width: 375px;
+    width: 450px;
     text-align: center;
   }
 

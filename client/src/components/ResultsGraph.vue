@@ -1,7 +1,8 @@
 <template>
   <v-container class="standings-graph-container border" dark>
     <line-chart v-if="chartData !== null" class="standings-graph-container"
-                :chart-data="chartData" />
+                :chart-data="chartData"
+                :style="styles"/>
   </v-container>
 </template>
 
@@ -13,16 +14,11 @@ export default {
   name: 'ResultsGraph',
   components: {LineChart},
   data: () => ({
-    chartData: null,
-    matches: []
+    matches: [],
+    chartData: null
   }),
-  watch: {
-    '$route.params.name': function () {
-      this.fetchData();
-    }
-  },
   computed: {
-    items: function () {
+    items () {
       if (this.matches !== undefined) {
         let unique = {};
         let teams = [];
@@ -106,106 +102,108 @@ export default {
 
         return teamStatistics;
       }
+    },
+    styles () {
+      return {
+        maxWidth: `${screen.width}px`,
+        width: `${screen.width < 425 ? screen.width - 25 : 425}px`
+      };
+    }
+  },
+  watch: {
+    '$route.params.name': function () {
+      this.fetchData();
     }
   },
   async mounted () {
     try {
       await this.fetchData();
-
-      let labels = this.items.map(i => i.team);
-      let gData = this.items.map(i => i.points);
-
-      this.chartData = {
-        labels: labels,
-        datasets: [{
-          label: '# of Points',
-          data: gData,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)',
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)',
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)',
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)', 'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)', 'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)', 'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
-          borderWidth: 1,
-          fill: false,
-          showLine: true,
-          borderCapStyle: "square",
-          borderColor: "#ffb80c",
-          borderWidth: 1
-        }]
-      };
+      this.getChartData();
     } catch (e) {
       console.error(e);
     }
   },
   methods: {
+    getChartData () {
+      if (this.matches !== undefined) {
+        let unique = {};
+        let teams = [];
+        this.matches.forEach(function (x) {
+          if (!unique[x.home]) {
+            teams.push(x.home);
+            unique[x.home] = true;
+          }
+        });
+
+        let teamsData = [];
+        let maxMatchesNumber = 0;
+        teams.forEach(team => {
+          let teamMatches = this.matches.filter(match => match.home === team || match.away === team).sort(this.compare);
+          let teamResult = [];
+          let teamPoints = 0;
+          maxMatchesNumber = maxMatchesNumber < teamMatches.length ? teamMatches.length : maxMatchesNumber;
+          teamMatches.forEach(teamMatch => {
+            let goals = teamMatch['score'].split(':');
+            let homeGoals = parseInt(goals[0]);
+            let awayGoals = parseInt(goals[1]);
+            let result = homeGoals > awayGoals ? 1 : homeGoals < awayGoals ? 2 : 0;
+
+            switch (team) {
+              case teamMatch.home:
+                switch (result) {
+                  case 0:
+                    teamPoints++;
+                    break;
+                  case 1:
+                    teamPoints += 3;
+                    break;
+                  case 2:
+                    break;
+                }
+                break;
+              case teamMatch.away:
+                switch (result) {
+                  case 0:
+                    teamPoints++;
+                    break;
+                  case 1:
+                    break;
+                  case 2:
+                    teamPoints += 3;
+                    break;
+                }
+                break;
+            }
+
+            teamResult.push(teamPoints);
+          });
+          teamsData.push(
+            {
+              label: team,
+              data: teamResult,
+              backgroundColor: [
+                `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`
+              ],
+              borderColor: [
+                `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`
+              ],
+              borderWidth: 1,
+              fill: false
+            }
+          );
+        });
+
+        let labels = [];
+        for (let i = 1; i <= maxMatchesNumber; i++) {
+          labels.push(i);
+        }
+
+        this.chartData = {
+          labels: labels,
+          datasets: teamsData
+        };
+      }
+    },
     async fetchData () {
       this.error = null;
 
@@ -263,29 +261,18 @@ export default {
       }
     },
     compare (a, b) {
-      if (a.points > b.points) {
+      if (new Date(a.startTime) < new Date(b.startTime)) {
         return -1;
       }
-      if (a.points < b.points) {
+      if (new Date(a.startTime) > new Date(b.startTime)) {
         return 1;
       }
-      if (a.diff > b.diff) {
-        return -1;
-      }
-      if (a.diff < b.diff) {
-        return 1;
-      }
+
       return 0;
     }
   }
 };
 </script>
 
-<style>
-  .standings-graph-container #bar-chart {
-    width: 100% !important;
-    max-width: 500px;
-    min-width: 300px;
-    padding: 0px;
-  }
+<style scoped>
 </style>

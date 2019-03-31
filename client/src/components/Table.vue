@@ -245,9 +245,8 @@ export default {
 
   #competition-table {
     text-align: center;
-    width: 100%;
-    min-width: 360px;
-    max-width: 550px;
+    width: 425px;
+    min-width: 375px;
   }
 
   #standings-table {
