@@ -1,31 +1,34 @@
 <template>
   <v-container class="standings-graph-container border" dark>
-    <v-list-tile router :to="`/competition/${this.$route.params.name}/standings-graph`">Standings</v-list-tile>
-    <bar-chart class="standings-graph-container"
-               v-if="chartData !== null"
-               :chart-data="chartData"
-               :styles="styles"
-    />
+    <v-breadcrumbs :items="navItems">
+      <v-breadcrumbs-item
+        v-for="item in navItems"
+        :key="item.text"
+        :disabled="item.disabled"
+        @click="navigateTo(item.link)">
+        {{ item.text }}
+      </v-breadcrumbs-item>
+    </v-breadcrumbs>
+
+    <v-list-tile router :to="`/competition/${this.$route.params.name}/results-graph`">Results</v-list-tile>
+    <line-chart v-if="chartData !== null" class="standings-graph-container"
+                :chart-data="chartData"
+                :options="options"/>
   </v-container>
 </template>
 
 <script>
-import BarChart from './BarChart.vue';
+import LineChart from './LineChart.vue';
 import api from '../services/api';
 
 export default {
-  name: 'StandingsGraph',
-  components: {BarChart},
+  name: 'ResultsGraph',
+  components: {LineChart},
   data: () => ({
+    matches: [],
     chartData: null,
-    matches: []
+    options: {responsive: true, maintainAspectRatio: false}
   }),
-  watch: {
-    '$route.params.name': function () {
-      this.chartData = null;
-      this.drawGraph();
-    }
-  },
   computed: {
     items () {
       if (this.matches !== undefined) {
@@ -112,17 +115,121 @@ export default {
         return teamStatistics;
       }
     },
-    styles () {
-      return {
-        maxWidth: `${screen.width}px`,
-        width: `${screen.width < 425 ? screen.width - 25 : 425}px`
-      };
+    navItems () {
+      if (!this.$route) {
+        return;
+      }
+      return [
+        {
+          text: 'Back',
+          disabled: false,
+          link: `/competition/${this.$route.params.name}`
+        },
+        {
+          text: 'Match Info',
+          disabled: true,
+          link: `/competition/${this.$route.params.name}`
+        }
+      ];
+    }
+  },
+  watch: {
+    '$route.params.name': function () {
+      this.fetchData();
     }
   },
   async mounted () {
-    await this.drawGraph();
+    try {
+      await this.fetchData();
+      this.getChartData();
+    } catch (e) {
+      console.error(e);
+    }
   },
   methods: {
+    navigateTo (route) {
+      this.$router.push(route);
+    },
+    getChartData () {
+      if (this.matches !== undefined) {
+        let unique = {};
+        let teams = [];
+        this.matches.forEach(function (x) {
+          if (!unique[x.home]) {
+            teams.push(x.home);
+            unique[x.home] = true;
+          }
+        });
+
+        let teamsData = [];
+        let maxMatchesNumber = 0;
+        teams.forEach(team => {
+          let teamMatches = this.matches.filter(match => match.home === team || match.away === team).sort(this.compare);
+          let teamResult = [];
+          let teamPoints = 0;
+          maxMatchesNumber = maxMatchesNumber < teamMatches.length ? teamMatches.length : maxMatchesNumber;
+          teamMatches.forEach(teamMatch => {
+            let goals = teamMatch['score'].split(':');
+            let homeGoals = parseInt(goals[0]);
+            let awayGoals = parseInt(goals[1]);
+            let result = homeGoals > awayGoals ? 1 : homeGoals < awayGoals ? 2 : 0;
+
+            switch (team) {
+              case teamMatch.home:
+                switch (result) {
+                  case 0:
+                    teamPoints++;
+                    break;
+                  case 1:
+                    teamPoints += 3;
+                    break;
+                  case 2:
+                    break;
+                }
+                break;
+              case teamMatch.away:
+                switch (result) {
+                  case 0:
+                    teamPoints++;
+                    break;
+                  case 1:
+                    break;
+                  case 2:
+                    teamPoints += 3;
+                    break;
+                }
+                break;
+            }
+
+            teamResult.push(teamPoints);
+          });
+          teamsData.push(
+            {
+              label: team,
+              data: teamResult,
+              backgroundColor: [
+                `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`
+              ],
+              borderColor: [
+                `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`
+              ],
+              borderWidth: 1,
+              fill: false
+            }
+          );
+        });
+
+        let labels = [];
+        for (let i = 1; i <= maxMatchesNumber; i++) {
+          labels.push(i);
+        }
+
+        this.chartData = {
+          labels: labels,
+          datasets: teamsData
+        };
+      }
+    },
     async fetchData () {
       this.error = null;
 
@@ -180,46 +287,18 @@ export default {
       }
     },
     compare (a, b) {
-      if (a.points > b.points) {
+      if (new Date(a.startTime) < new Date(b.startTime)) {
         return -1;
       }
-      if (a.points < b.points) {
+      if (new Date(a.startTime) > new Date(b.startTime)) {
         return 1;
       }
-      if (a.diff > b.diff) {
-        return -1;
-      }
-      if (a.diff < b.diff) {
-        return 1;
-      }
+
       return 0;
-    },
-    async drawGraph () {
-      try {
-        await this.fetchData();
-
-        let labels = this.items.map(i => i.team);
-        let gData = this.items.map(i => i.points);
-
-        let colors = gData.map(_ => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.2)`);
-
-        this.chartData = {
-          labels: labels,
-          datasets: [{
-            label: '# of Points',
-            data: gData,
-            backgroundColor: colors,
-            borderColor: colors,
-            borderWidth: 1
-          }]
-        };
-      } catch (e) {
-        console.error(e);
-      }
     }
   }
 };
 </script>
 
-<style scoped>
+<style>
 </style>

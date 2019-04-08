@@ -1,5 +1,6 @@
 <template>
   <v-container class="standings-graph-container border" dark>
+    <v-list-tile router :to="`/competition/${this.$route.params.name}/results-graph`">Results</v-list-tile>
     <line-chart v-if="chartData !== null" class="standings-graph-container"
                 :chart-data="chartData"
                 :style="styles"/>
@@ -112,16 +113,12 @@ export default {
   },
   watch: {
     '$route.params.name': function () {
-      this.fetchData();
+      this.chartData = null;
+      this.drawGraph();
     }
   },
   async mounted () {
-    try {
-      await this.fetchData();
-      this.getChartData();
-    } catch (e) {
-      console.error(e);
-    }
+    this.drawGraph();
   },
   methods: {
     getChartData () {
@@ -269,6 +266,14 @@ export default {
       }
 
       return 0;
+    },
+    async drawGraph () {
+      try {
+        await this.fetchData();
+        this.getChartData();
+      } catch (e) {
+        console.error(e);
+      }
     }
   }
 };

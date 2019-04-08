@@ -1,10 +1,12 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import HelloWorld from '@/components/HelloWorld';
+import Home from '@/components/Home';
 import Register from '@/components/Register';
 import Login from '@/components/Login';
-import Match from '../components/Match';
-import Competition from '../components/Competition';
+import Match from '@/components/Match';
+import Competition from '@/components/Competition';
+import ResultsGraphStandalone from '@/components/ResultsGraphStandalone';
+import StandingsGraphStandalone from '@/components/StandingsGraphStandalone';
 
 Vue.use(Router);
 
@@ -13,7 +15,7 @@ const router = new Router({
     {
       path: '/',
       name: 'root',
-      component: HelloWorld
+      component: Home
     },
     {
       path: '/register',
@@ -34,6 +36,16 @@ const router = new Router({
       path: '/competition/:name',
       name: 'Competition',
       component: Competition
+    },
+    {
+      path: '/competition/:name/standings-graph',
+      name: 'Standings',
+      component: StandingsGraphStandalone
+    },
+    {
+      path: '/competition/:name/results-graph',
+      name: 'Results',
+      component: ResultsGraphStandalone
     }
   ],
   hashbang: false,

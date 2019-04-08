@@ -1,10 +1,20 @@
 <template>
   <v-container class="standings-graph-container border" dark>
+    <v-breadcrumbs :items="navItems">
+      <v-breadcrumbs-item
+        v-for="item in navItems"
+        :key="item.text"
+        :disabled="item.disabled"
+        @click="navigateTo(item.link)">
+        {{ item.text }}
+      </v-breadcrumbs-item>
+    </v-breadcrumbs>
+
     <v-list-tile router :to="`/competition/${this.$route.params.name}/standings-graph`">Standings</v-list-tile>
     <bar-chart class="standings-graph-container"
                v-if="chartData !== null"
                :chart-data="chartData"
-               :styles="styles"
+               :options="options"
     />
   </v-container>
 </template>
@@ -18,7 +28,8 @@ export default {
   components: {BarChart},
   data: () => ({
     chartData: null,
-    matches: []
+    matches: [],
+    options: {responsive: true, maintainAspectRatio: false}
   }),
   watch: {
     '$route.params.name': function () {
@@ -27,6 +38,23 @@ export default {
     }
   },
   computed: {
+    navItems () {
+      if (!this.$route) {
+        return;
+      }
+      return [
+        {
+          text: 'Back',
+          disabled: false,
+          link: `/competition/${this.$route.params.name}`
+        },
+        {
+          text: 'Match Info',
+          disabled: true,
+          link: `/competition/${this.$route.params.name}`
+        }
+      ];
+    },
     items () {
       if (this.matches !== undefined) {
         let unique = {};
@@ -111,12 +139,6 @@ export default {
 
         return teamStatistics;
       }
-    },
-    styles () {
-      return {
-        maxWidth: `${screen.width}px`,
-        width: `${screen.width < 425 ? screen.width - 25 : 425}px`
-      };
     }
   },
   async mounted () {
@@ -216,6 +238,9 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+    navigateTo (route) {
+      this.$router.push(route);
     }
   }
 };
